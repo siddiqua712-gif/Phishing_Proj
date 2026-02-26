@@ -16,6 +16,11 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
+# Load ML model
+model = pickle.load(open("static/models/svm_model.pkl", "rb"))
+vectorizer = pickle.load(open("static/models/vect.pkl", "rb"))
+lrmodel = pickle.load(open("static/models/model.pkl", "rb"))
+
 # Tables
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -30,11 +35,6 @@ class Activity(db.Model):
     prediction = db.Column(db.String(50))
     probability = db.Column(db.Float)
     date = db.Column(db.DateTime, default=lambda:datetime.now(IST))
-
-# Load ML model
-model = pickle.load(open("svm_model.pkl", "rb"))
-vectorizer = pickle.load(open("vect.pkl", "rb"))
-lrmodel = pickle.load(open("model.pkl" , "rb"))
 
 # --- Routes ---
 @app.route("/admin")
