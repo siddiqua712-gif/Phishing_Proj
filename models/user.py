@@ -1,5 +1,4 @@
 from flask_sqlalchemy import SQLAlchemy
-from appp import db
 
 db = SQLAlchemy()  # Use the same db instance in your main app if you already have one
 
