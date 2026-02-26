@@ -6,15 +6,20 @@ from werkzeug.security import generate_password_hash
 import pickle
 from datetime import datetime
 import pytz
+from models.user import User
 
 IST = pytz.timezone("Asia/Kolkata")
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
 # Database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///user.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+with app.app_context():
+    db.create_all()
+    
 
 # Load ML model
 model = pickle.load(open("static/models/svm_model.pkl", "rb"))
