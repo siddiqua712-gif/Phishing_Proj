@@ -26,13 +26,6 @@ model = pickle.load(open("static/models/svm_model.pkl", "rb"))
 vectorizer = pickle.load(open("static/models/vect.pkl", "rb"))
 lrmodel = pickle.load(open("static/models/model.pkl", "rb"))
 
-# Tables
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(100), unique=True)
-    password = db.Column(db.String(200))
-    role = db.Column(db.String(20), default = "user")
-
 class Activity(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100))
