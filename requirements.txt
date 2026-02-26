@@ -10,4 +10,3 @@ packaging==26.0
 scikit-learn==1.4.0
 scipy==1.17.0
 threadpoolctl==3.6.0
-pickle-mixin==1.0.2
