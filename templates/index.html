@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+.navbar .nav-link.active {
+    font-weight: bold;
+    color: #ffc107 !important;
+}
+</style>
+    <title>Phishing Email Detector</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+.navbar {
+    padding: 15px 30px;
+    font-size: 18px;
+}
+
+.navbar-brand {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.nav-link {
+    margin-left: 15px;
+}
+    body {
+        font-family: Arial;
+        background-color: #f4f4f4;
+        padding: 40px;
+    }
+
+    h1 {
+        color: #333;
+    }
+
+    input, textarea {
+        width: 60%;
+        padding: 8px;
+        margin-top: 5px;
+    }
+
+    input[type="submit"] {
+        width: 200px;
+        background-color: #007BFF;
+        color: white;
+        border: none;
+        padding: 10px;
+        cursor: pointer;
+    }
+
+    input[type="submit"]:hover {
+        background-color: #0056b3;
+    }
+
+    .result {
+        margin-top: 20px;
+        font-size: 20px;
+        font-weight: bold;
+    }
+</style>
+</head>
+<body style="padding-top: 80px;">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top shadow">
+  <div class="container-fluid px-4">
+
+    <!-- App Name -->
+    <a class="navbar-brand fw-bold" href="/">
+        🛡️ Phishing Detector
+    </a>
+
+    <!-- Mobile toggle -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+        data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+
+        <!-- LEFT MENU -->
+        <ul class="navbar-nav me-auto">
+
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'home' %}active{% endif %}" href="/">Check Email</a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="/dashboard">Dashboard</a>
+            </li>
+
+            {% if session.get("role") == "admin" %}
+            <li class="nav-item">
+                <a class="nav-link" href="/admin">Admin Panel</a>
+            </li>
+            {% endif %}
+
+        </ul>
+
+        <!-- RIGHT SIDE -->
+        <span class="navbar-text text-white me-3">
+            👤 {{ session.get("user") }}
+        </span>
+
+        <a href="/logout" class="btn btn-danger btn-sm">
+            Logout
+        </a>
+
+    </div>
+  </div>
+</nav>
+<div class="container mt-4">
+    <form method="POST">
+    
+    <label>Subject:</label><br>
+    <input type="text" name="subject" placeholder="Enter email subject" value="{{subject}}" class="form-control" required><br><br>
+    
+    <label>Sender:</label><br>
+    <input type="text" name="sender" placeholder="Enter sender email" value="{{sender}}" class="form-control" required><br><br>
+    
+    <label>URLs (if any):</label><br>
+    <input type="text" name="urls" placeholder="Enter URLs separated by commas" value="{{URLs}}" class="form-control"><br><br>
+    
+    <label>Email Body:</label><br>
+    <textarea name="body" rows="6" cols="60" placeholder="Paste email body here" class="form-control" required>{{body}}</textarea><br><br>
+    
+    <button type="submit" class="btn btn-primary">Check Email</button>
+
+    <button type="reset" class="btn btn-secondary" color="yellow">Clear</button>
+
+</form>
+{% if prediction %}
+<div class="alert alert-info text-center mt-4">
+    <h4>{{ prediction }}</h4>
+    <p>Confidence: {{ probability }}%</p>
+</div>
+{% endif %}
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

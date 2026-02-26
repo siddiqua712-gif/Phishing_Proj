@@ -1,0 +1,8 @@
+mlenv/
+venv/
+__pycache__/
+*.pyc
+*.db
+*.pkl
+.env
+.vscode/

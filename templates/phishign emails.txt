@@ -1,0 +1,12 @@
+Phishing email:
+Sender: paytowin@gmail.com
+Subject: Chance to win unlimited gifts!!!
+Email body: Dear Customer,
+You have been selected to win unlimited gifts including a TV, a smartphone and many other exciting things! Pay only $2 to get a chance.
+
+
+Legitimate email:
+Sender: Admissions.jgls@jgu-ioe.edu.in
+Subject: Freshers event at your college.
+URLs: https://forms.gle/EKTMbtN83QjtzhvB9
+Body: You are cordially invited to a college event for freshers.

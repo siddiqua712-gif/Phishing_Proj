@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard</title>
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+.navbar {
+    padding: 15px 30px;
+    font-size: 18px;
+}
+
+.navbar-brand {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.nav-link {
+    margin-left: 15px;
+}
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: #007BFF;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .logout {
+            float: right;
+            text-decoration: none;
+            background: red;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body style="padding-top: 80px;">
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top shadow">
+  <div class="container-fluid px-4">
+
+    <!-- App Name -->
+    <a class="navbar-brand fw-bold" href="/">
+        Admin Dashboard
+    </a>
+    <!-- Mobile toggle -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+        data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+<div class="collapse navbar-collapse" id="navbarNav">
+<ul class="navbar-nav me-auto">
+
+        </ul>
+<span class="navbar-text text-white me-3">
+            👤 {{ session.get("user") }}
+        </span>
+
+        <a href="/logout" class="btn btn-danger btn-sm">
+            Logout
+        </a>
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-5">
+<div class="card">
+    <h2>All Users</h2>
+
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Role</th>
+        </tr>
+
+        {% for user in users %}
+        <tr>
+            <td>{{ user.id }}</td>
+            <td>{{ user.username }}</td>
+            <td>{{ user.role }}</td>
+        </tr>
+        {% endfor %}
+
+    </table>
+</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Phishing Email Detector</title>
+</head>
+<body>
+    <h1>Phishing Email Detector</h1>
+    <form method="POST">
+        <textarea name="email_text" rows="6" cols="60" placeholder="Paste your email here"></textarea><br><br>
+        <input type="submit" value="Check">
+    </form>
+    {% if prediction is not none %}
+        <h2>Prediction: {{ prediction }}</h2>
+    {% endif %}
+</body>
+</html>
