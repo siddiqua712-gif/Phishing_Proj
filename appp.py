@@ -6,12 +6,14 @@ from werkzeug.security import generate_password_hash
 import pickle
 from extensions import db
 from datetime import datetime
+from datetime import timedelta
 import pytz
 
 IST = pytz.timezone("Asia/Kolkata")
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
+app.config['PERMANENT_SESSION_LIFETIME']=timedelta(minutes=15)
 
 # Database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///user.db'
@@ -46,7 +48,7 @@ lrmodel = pickle.load(open("static/models/model.pkl", "rb"))
 @app.route("/admin")
 def admin_dashboard():
     if "user" not in session or session.get("role") != "admin":
-        return redirect(url_for("login"))
+        return redirect(url_for("login",message="Session expired. Please log in again."))
 
     all_users = User.query.all()
     all_activities = Activity.query.all()
@@ -61,6 +63,7 @@ def login():
         user = User.query.filter_by(username=username).first()
 
         if user and check_password_hash(user.password, password):
+            session.permanent = True
             session["user"] = username
             session["role"] = user.role
 
@@ -119,7 +122,7 @@ def home():
 
         result = model.predict(X)[0]
         probability = lrmodel.predict_proba(X)[0][1]
-        threshold=0.65
+        threshold=0.5
 
         prediction = "Phishing Email 🚨" if probability >= threshold else "Safe Email ✅"
 
