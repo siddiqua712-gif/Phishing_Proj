@@ -119,8 +119,9 @@ def home():
 
         result = model.predict(X)[0]
         probability = lrmodel.predict_proba(X)[0][1]
+        threshold=0.65
 
-        prediction = "Phishing Email 🚨" if result == 1 else "Safe Email ✅"
+        prediction = "Phishing Email 🚨" if probability >= threshold else "Safe Email ✅"
 
         # Save activity
         activity = Activity(
