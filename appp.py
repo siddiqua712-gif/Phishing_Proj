@@ -107,31 +107,44 @@ def home():
     if "user" not in session:
         return redirect(url_for("login"))
 
+    # Initialize variables
     prediction = None
     probability = None
-    subject = sender = urls = body = ""
+    subject = sender = body = ""
 
     if request.method == "POST":
-        subject = request.form["subject"]
-        sender = request.form["sender"]
-        urls = request.form["urls"]
-        body = request.form["body"]
+        # Get form data
+        subject = request.form.get("subject", "")
+        sender = request.form.get("sender", "")
+        body = request.form.get("body", "")
 
-        combined_text = f"{subject} {sender} {urls} {body}"
+        # --- ML prediction ---
+        combined_text = f"{subject} {sender} {body}"
         X = vectorizer.transform([combined_text])
-
         result = model.predict(X)[0]
-        probability = lrmodel.predict_proba(X)[0][1]
-        threshold=0.5
+        probability = lrmodel.predict_proba(X)[0][1]  # probability of phishing
 
-        prediction = "Phishing Email 🚨" if probability >= threshold else "Safe Email ✅"
+        suspicious_words = ["urgent", "password", "verify", "account", "click", "login"]
+        num_suspicious = sum(word in body.lower() for word in suspicious_words)
 
-        # Save activity
+        # --- Adjust probability ---
+        prob_adjusted = probability
+
+        if num_suspicious == 0:
+            prob_adjusted *= 0.5  # reduce probability for trusted senders
+        elif num_suspicious > 2:
+            prob_adjusted = min(prob_adjusted * 1.2, 1.0)  # increase slightly, cap at 1.0
+
+        # --- Threshold for phishing ---
+        threshold = 0.6
+        prediction = "Phishing Email 🚨" if prob_adjusted >= threshold else "Safe Email ✅"
+
+        # --- Save activity ---
         activity = Activity(
             username=session["user"],
             subject=subject,
             prediction=prediction,
-            probability=round(probability * 100, 2)
+            probability=round(prob_adjusted * 100, 2)
         )
         db.session.add(activity)
         db.session.commit()
@@ -139,13 +152,11 @@ def home():
     return render_template(
         "index.html",
         prediction=prediction,
-        probability=round(probability*100,2) if probability else None,
+        probability=round(prob_adjusted * 100, 2) if probability else None,
         subject=subject,
         sender=sender,
-        urls=urls,
         body=body
     )
-
 @app.route("/dashboard")
 def dashboard():
     if "user" not in session:
