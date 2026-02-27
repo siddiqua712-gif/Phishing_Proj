@@ -78,6 +78,7 @@
     <!-- App Name -->
     <a class="navbar-brand fw-bold" href="/">
         Admin Dashboard
+        <p> Shows logs of users to admins. </p>
     </a>
     <!-- Mobile toggle -->
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
