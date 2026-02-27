@@ -4,37 +4,36 @@ from flask_migrate import Migrate
 from werkzeug.security import check_password_hash
 from werkzeug.security import generate_password_hash
 import pickle
+from extensions import db
 from datetime import datetime
 import pytz
 
 IST = pytz.timezone("Asia/Kolkata")
+
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
 # Database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///user.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db=SQLAlchemy(app)
+
+db.init_app(app)       # bind to app
 migrate = Migrate(app, db)
+
+# Import models AFTER db is initialized
 from models.user import User
+from models.activity import Activity
+
+# Create tables if they don't exist
 with app.app_context():
     db.create_all()
-    
 
-# Load ML model
+# Load ML models
 model = pickle.load(open("static/models/svm_model.pkl", "rb"))
 vectorizer = pickle.load(open("static/models/vect.pkl", "rb"))
 lrmodel = pickle.load(open("static/models/model.pkl", "rb"))
 
-class Activity(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(100))
-    subject = db.Column(db.Text)
-    prediction = db.Column(db.String(50))
-    probability = db.Column(db.Float)
-    date = db.Column(db.DateTime, default=lambda:datetime.now(IST))
-
-# --- Routes ---
+# ----------------- ROUTES -----------------
 @app.route("/admin")
 def admin_dashboard():
     if "user" not in session or session.get("role") != "admin":
@@ -56,14 +55,10 @@ def login():
             session["user"] = username
             session["role"] = user.role
 
-            # ADMIN LOGIN
             if user.role == "admin":
                 return redirect(url_for("admin_dashboard"))
-
-            # NORMAL USER LOGIN
             else:
                 return redirect(url_for("dashboard"))
-
         else:
             return render_template("login.html", error="Invalid credentials")
 
@@ -75,20 +70,13 @@ def register():
         username = request.form["username"]
         password = request.form["password"]
 
-        # check if user exists
         existing_user = User.query.filter_by(username=username).first()
-
         if existing_user:
             return render_template("register.html", error="User already exists")
 
         hashed_password = generate_password_hash(password)
 
-        new_user = User(
-            username=username,
-            password=hashed_password,
-            role="user"
-        )
-
+        new_user = User(username=username, password=hashed_password, role="user")
         db.session.add(new_user)
         db.session.commit()
 
@@ -99,6 +87,7 @@ def register():
 @app.route("/logout")
 def logout():
     session.pop("user", None)
+    session.pop("role", None)
     return redirect(url_for("login"))
 
 @app.route("/", methods=["GET", "POST"])
@@ -108,11 +97,7 @@ def home():
 
     prediction = None
     probability = None
-
-    subject = ""
-    sender = ""
-    urls = ""
-    body = ""
+    subject = sender = urls = body = ""
 
     if request.method == "POST":
         subject = request.form["subject"]
@@ -120,7 +105,7 @@ def home():
         urls = request.form["urls"]
         body = request.form["body"]
 
-        combined_text = subject + " " + sender + " " + urls + " " + body
+        combined_text = f"{subject} {sender} {urls} {body}"
         X = vectorizer.transform([combined_text])
 
         result = model.predict(X)[0]
@@ -128,14 +113,13 @@ def home():
 
         prediction = "Phishing Email 🚨" if result == 1 else "Safe Email ✅"
 
-        # ✅ SAVE TO DATABASE
+        # Save activity
         activity = Activity(
             username=session["user"],
             subject=subject,
             prediction=prediction,
             probability=round(probability * 100, 2)
         )
-
         db.session.add(activity)
         db.session.commit()
 
@@ -148,6 +132,7 @@ def home():
         urls=urls,
         body=body
     )
+
 @app.route("/dashboard")
 def dashboard():
     if "user" not in session:
