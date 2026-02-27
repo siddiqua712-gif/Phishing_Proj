@@ -7,6 +7,7 @@ import pickle
 from extensions import db
 from datetime import datetime
 from datetime import timedelta
+from flask import redirect,url_for,flash
 import pytz
 
 IST = pytz.timezone("Asia/Kolkata")
@@ -104,55 +105,69 @@ def logout():
 
 @app.route("/", methods=["GET", "POST"])
 def home():
+
     if "user" not in session:
         return redirect(url_for("login"))
 
-    # Initialize variables
     prediction = None
     probability = None
-    subject = sender = body = ""
+    subject = ""
+    sender = ""
+    body = ""
 
     if request.method == "POST":
-        # Get form data
-        subject = request.form.get("subject", "")
-        sender = request.form.get("sender", "")
-        body = request.form.get("body", "")
 
-        # --- ML prediction ---
+        subject = request.form.get("subject") or ""
+        sender = request.form.get("sender") or ""
+        body = request.form.get("body") or ""
+
         combined_text = f"{subject} {sender} {body}"
         X = vectorizer.transform([combined_text])
-        result = model.predict(X)[0]
-        probability = lrmodel.predict_proba(X)[0][1]  # probability of phishing
 
-        suspicious_words = ["urgent", "password", "verify", "account", "click", "login"]
-        num_suspicious = sum(word in body.lower() for word in suspicious_words)
+        probability = lrmodel.predict_proba(X)[0][1]
 
-        # --- Adjust probability ---
+        suspicious_words = [
+            "urgent","password","verify","account",
+            "click","login","bank","security","reset","pay","$"
+        ]
+
+        num_suspicious = sum(
+            word in body.lower() for word in suspicious_words
+        )
+
         prob_adjusted = probability
 
         if num_suspicious == 0:
-            prob_adjusted *= 0.5  # reduce probability for trusted senders
-        elif num_suspicious > 2:
-            prob_adjusted = min(prob_adjusted * 1.2, 1.0)  # increase slightly, cap at 1.0
+            prob_adjusted -= 0.10
+        elif num_suspicious == 1:
+            prob_adjusted += 0.05
+        elif num_suspicious >= 3:
+            prob_adjusted += 0.10
 
-        # --- Threshold for phishing ---
-        threshold = 0.6
-        prediction = "Phishing Email 🚨" if prob_adjusted >= threshold else "Safe Email ✅"
+        prob_adjusted = max(0.0, min(prob_adjusted, 1.0))
 
-        # --- Save activity ---
+        prediction = (
+            "Phishing Email 🚨"
+            if prob_adjusted >= 0.65
+            else "Safe Email ✅"
+        )
+
         activity = Activity(
             username=session["user"],
             subject=subject,
             prediction=prediction,
             probability=round(prob_adjusted * 100, 2)
         )
+
         db.session.add(activity)
         db.session.commit()
+
+        probability = round(prob_adjusted * 100, 2)
 
     return render_template(
         "index.html",
         prediction=prediction,
-        probability=round(prob_adjusted * 100, 2) if probability else None,
+        probability=probability,
         subject=subject,
         sender=sender,
         body=body
@@ -162,7 +177,16 @@ def dashboard():
     if "user" not in session:
         return redirect(url_for("login"))
 
-    logs = Activity.query.filter_by(username=session["user"]).all()
+    logs = Activity.query.filter_by(
+        username=session.get("user")
+    ).all()
+
+    # ---- SAFETY CLEANING ----
+    for log in logs:
+        log.subject = log.subject or ""
+        log.prediction = log.prediction or "Unknown"
+        log.probability = log.probability or 0
+
     return render_template("dashboard.html", logs=logs)
 
 if __name__ == "__main__":
