@@ -28,6 +28,15 @@ from models.activity import Activity
 with app.app_context():
     db.create_all()
 
+
+    if not User.query.filter_by(username="admin").first():
+        admin_user = User(
+            username="admin",
+            password=generate_password_hash("admin123"),  # change password!
+            role="admin"
+        )
+        db.session.add(admin_user)
+        db.session.commit()
 # Load ML models
 model = pickle.load(open("static/models/svm_model.pkl", "rb"))
 vectorizer = pickle.load(open("static/models/vect.pkl", "rb"))
