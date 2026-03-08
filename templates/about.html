@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+.navbar .nav-link.active {
+    font-weight: bold;
+    color: #ffc107 !important;
+}
+</style>
+    <title>Phishing Email Detector</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+.navbar {
+    padding: 15px 30px;
+    font-size: 18px;
+}
+
+.navbar-brand {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.nav-link {
+    margin-left: 15px;
+}
+    body {
+        font-family: Arial;
+        background-color: #f4f4f4;
+        padding: 40px;
+    }
+
+    h1 {
+        color: #333;
+    }
+
+    input, textarea {
+        width: 60%;
+        padding: 8px;
+        margin-top: 5px;
+    }
+
+    input[type="submit"] {
+        width: 200px;
+        background-color: #007BFF;
+        color: white;
+        border: none;
+        padding: 10px;
+        cursor: pointer;
+    }
+
+    input[type="submit"]:hover {
+        background-color: #0056b3;
+    }
+
+    .result {
+        margin-top: 20px;
+        font-size: 20px;
+        font-weight: bold;
+    }
+</style>
+</head>
+<body style="padding-top: 80px;">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top shadow">
+  <div class="container-fluid px-4">
+
+    <!-- App Name -->
+    <a class="navbar-brand fw-bold" href="/">
+        🛡️ Phishing Detector
+    </a>
+
+    <!-- Mobile toggle -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+        data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+
+        <!-- LEFT MENU -->
+        <ul class="navbar-nav me-auto">
+
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'home' %}active{% endif %}" href="/">Check Email</a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="/dashboard">Dashboard</a>
+            </li>
+			
+			<li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'about' %}active{% endif %}" href="/about">About Page</a>
+            </li>
+
+            {% if session.get("role") == "admin" %}
+            <li class="nav-item">
+                <a class="nav-link" href="/admin">Admin Panel</a>
+            </li>
+            {% endif %}
+
+        </ul>
+
+        <!-- RIGHT SIDE -->
+        <span class="navbar-text text-white me-3">
+            👤 {{ session.get("user") }}
+        </span>
+
+        <a href="/logout" class="btn btn-danger btn-sm">
+            Logout
+        </a>
+
+    </div>
+  </div>
+</nav>
+
+<body>
+
+<div class="container mt-5">
+
+    <!-- Welcome Card -->
+    <div class="card p-4 mb-4">
+        <h2 class="mb-2">
+            Welcome, {{ session["user"] }} 👋
+            <h3>About Phishing Email Detector</h3>
+
+</h2>
+        <p class="text-muted">
+This system detects phishing emails using machine learning.
+Users enter email subject, sender, and content to check whether
+the email is safe or phishing.
+</p>
+
+<h2>Steps to use Phishing E-mail detector:</h2>
+
+<ul>
+<li>Go to Phishing Email page from on the navigation bar</li>
+<li>Enter your Email's subject, sender, body etc.</li>
+<li>Click on "Check Email".</li>
+<li>The system will show if it is a phishing email or a legitimate email.</li>
+<li>Click "Clear" to enter a new Email.</li>
+</ul>
+
+</div>
+<a href="/dashboard" class="btn-primary"><button>Go to Dashboard</button>
+</a>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -71,7 +71,7 @@ def login():
             if user.role == "admin":
                 return redirect(url_for("admin_dashboard"))
             else:
-                return redirect(url_for("dashboard"))
+                return redirect(url_for("about"))
         else:
             return render_template("login.html", error="Invalid credentials")
 
@@ -188,6 +188,12 @@ def dashboard():
         log.probability = log.probability or 0
 
     return render_template("dashboard.html", logs=logs)
+@app.route("/about")
+def about():
+    if "user" not in session:
+        return redirect(url_for("login"))
+    return render_template("about.html")
+    
 
 if __name__ == "__main__":
     app.run(debug=True)
