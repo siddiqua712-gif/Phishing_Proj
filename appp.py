@@ -10,11 +10,12 @@ from datetime import timedelta
 from flask import redirect,url_for,flash
 import pytz
 
+
 IST = pytz.timezone("Asia/Kolkata")
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
-app.config['PERMANENT_SESSION_LIFETIME']=timedelta(minutes=15)
+app.permanent_session_lifetime = timedelta(minutes=15)
 
 # Database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///user.db'
@@ -64,7 +65,7 @@ def login():
         user = User.query.filter_by(username=username).first()
 
         if user and check_password_hash(user.password, password):
-            session.permanent = True
+            session.permanent = False
             session["user"] = username
             session["role"] = user.role
 
@@ -101,6 +102,7 @@ def register():
 def logout():
     session.pop("user", None)
     session.pop("role", None)
+    session.clear()
     return redirect(url_for("login"))
 
 @app.route("/", methods=["GET", "POST"])
